@@ -42,7 +42,7 @@ H001 (12-1 momentum) is deliberately the first entry: it is the most-replicated 
 ## Roadmap
 
 - [x] Skeleton: operators, backtest, DSR screening, registry
-- [ ] H001 momentum calibration vs French UMD
+- [x] H001 momentum calibration vs French UMD — **passed** (monthly corr 0.70; see `LEDGER.md`)
 - [ ] H002+ from the registry, one per week
 - [ ] Cost sensitivity + capacity notes per surviving signal
 - [ ] PIT fundamental source (SEC EDGAR) → accounting-based hypotheses
