@@ -1,13 +1,15 @@
 # open-alpha-lab
 
+![tests](https://github.com/maoxuwu/open-alpha-lab/actions/workflows/tests.yml/badge.svg)
+
 A disciplined cross-sectional equity research pipeline on **open data** — hypothesis registry, minimal constructs, multiple-testing-aware screening, and a public death ledger.
 
-This repo is the open-data twin of a research process I developed on WorldQuant BRAIN (13 production alphas, IQC 2026 UK #32). Platform work can't be inspected by outsiders; this can. The point here is not any single signal — most registered hypotheses are *expected to die* — but the **process that decides which ones live**, visible end to end.
+This repo is the open-data twin of a research process I developed on WorldQuant BRAIN (13 alphas live out-of-sample, IQC 2026 UK #32). Platform work can't be inspected by outsiders; this can. The point here is not any single signal — most registered hypotheses are *expected to die* — but the **process that decides which ones live**, visible end to end.
 
 ## What makes this different from another backtest repo
 
 1. **Hypotheses are registered before simulation** (`hypotheses/`): each entry states the economic mechanism ("who pays, and why they keep paying"), the state variable, the predicted correlation with existing live signals, and a **pre-registered kill condition**. No post-hoc sign flips; deaths are recorded, not deleted (`LEDGER.md`).
-2. **Multiple-testing arithmetic is built in** (`src/oal/stats.py`): every batch reports the Deflated Sharpe Ratio (Bailey & López de Prado 2014) against the batch's own noise ceiling — scanning N variants manufactures an expected max Sharpe of roughly √(2·ln N)/√T even from pure noise, and the screener charges for it. The implementation is Monte-Carlo verified (see docstrings).
+2. **Multiple-testing arithmetic is built in** (`src/oal/stats.py`): every batch reports the Deflated Sharpe Ratio (Bailey & López de Prado 2014) against the batch's own noise ceiling — scanning N variants manufactures an expected max Sharpe of roughly √(2·ln N)/√T even from pure noise, and the screener charges for it. The claim is backed by runnable evidence: `tests/test_stats.py` re-runs the Monte-Carlo verification (a 100-strategy noise batch whose champion's PSR ≈ 0.99 gets deflated below 0.8 while a genuine Sharpe-2 signal survives) on every CI push, alongside look-ahead and cost-accounting regression tests for the backtester.
 3. **Honest limitations, stated up front** (see below), because knowing what your backtest cannot claim is the half of research that survives contact with live capital.
 
 ## Structure
@@ -31,11 +33,15 @@ uv sync                          # or: pip install -e .
 uv run python scripts/run_h001.py   # H001: 12-1 momentum, the calibration hypothesis
 ```
 
-H001 (12-1 momentum) is deliberately the first entry: it is the most-replicated anomaly in the literature, so it doubles as a **pipeline calibration** — if the pipeline can't reproduce the sign and rough magnitude of momentum on liquid US equities, the bug is in the pipeline, not the market. Results are benchmarked against Ken French's UMD factor.
+H001 (12-1 momentum) is deliberately the first entry: it is the most-replicated anomaly in the literature, so it doubles as a **pipeline calibration** — if the pipeline can't reproduce the sign and rough magnitude of momentum on liquid US equities, the bug is in the pipeline, not the market. Results are benchmarked against Ken French's UMD factor:
+
+![H001 vs UMD](results/h001_vs_umd.png)
+
+(Regenerate with `uv run python scripts/plot_h001.py`.)
 
 ## Known limitations (read before believing any number)
 
-- **Survivorship bias**: the default universe is current index constituents fetched from yfinance; delisted names are absent, which inflates long-side returns. Treated as an upper bound; conclusions rely on cross-sectional *relative* statements and on effects also verified in the French data (which is survivorship-free).
+- **Survivorship bias**: the universe is built from *current* constituents (S&P 500 via Wikipedia, with a built-in 100-mega-cap fallback when the fetch fails — **all results to date use the fallback-100 universe**; each ledger entry states which). Delisted names are absent, which inflates long-side returns. Treated as an upper bound; conclusions rely on cross-sectional *relative* statements and on effects also verified in the French data (which is survivorship-free).
 - **No intraday fills, simplistic costs**: costs are a flat bps parameter on turnover; adequate for ranking hypotheses, not for capacity claims.
 - **Point-in-time discipline is approximate**: prices are adjusted-close series; no PIT fundamentals are used at all for this reason (price/volume constructs only, until a PIT source is added).
 
@@ -43,7 +49,9 @@ H001 (12-1 momentum) is deliberately the first entry: it is the most-replicated 
 
 - [x] Skeleton: operators, backtest, DSR screening, registry
 - [x] H001 momentum calibration vs French UMD — **passed** (monthly corr 0.70; see `LEDGER.md`)
-- [ ] H002+ from the registry, one per week
+- [x] H002 short-horizon reversal — **dead by pre-registered kill condition** (gross edge gone in mega caps; costs quantified)
+- [x] H003 lottery/MAX effect — **dead** (wrong habitat; opposite-sign result recorded, not adopted)
+- [ ] H004+ from the registry
 - [ ] Cost sensitivity + capacity notes per surviving signal
 - [ ] PIT fundamental source (SEC EDGAR) → accounting-based hypotheses
 

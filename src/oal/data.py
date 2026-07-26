@@ -40,11 +40,11 @@ def sp500_tickers() -> list[str]:
 def load_panel(start: str = "2015-01-01", end: str | None = None,
                tickers: list[str] | None = None, refresh: bool = False):
     """Returns dict of wide DataFrames: close (adj), volume, returns."""
-    import yfinance as yf
     path = os.path.join(CACHE, "panel.parquet")
     if os.path.exists(path) and not refresh:
         px = pd.read_parquet(path)
     else:
+        import yfinance as yf  # lazy: only needed when the cache is cold
         tickers = tickers or sp500_tickers()
         raw = yf.download(tickers, start=start, end=end, auto_adjust=True,
                           progress=True, group_by="column")

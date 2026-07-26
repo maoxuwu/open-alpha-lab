@@ -1,0 +1,5 @@
+variant,net_sharpe,turnover
+max10,-1.29,0.117
+max20,-1.16,0.062
+max60,-0.93,0.023
+max20_vol,-0.85,0.089

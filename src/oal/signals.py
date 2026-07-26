@@ -81,3 +81,7 @@ def ts_decay_linear(x: pd.DataFrame, d: int) -> pd.DataFrame:
     w = np.arange(1, d + 1, dtype=float)
     w /= w.sum()
     return x.rolling(d).apply(lambda a: np.dot(a, w), raw=True)
+
+
+def ts_max(x: pd.DataFrame, d: int) -> pd.DataFrame:
+    return x.rolling(d, min_periods=max(2, d // 2)).max()

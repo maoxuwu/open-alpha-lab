@@ -3,11 +3,6 @@
 Usage:  uv run python scripts/run_h001.py          (first run downloads ~500 tickers, minutes)
 Output: batch DSR table + UMD benchmark correlation + verdict vs pre-registered criteria.
 """
-import os
-import sys
-
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
-
 import numpy as np
 from oal import backtest, data, signals as S
 from oal.stats import screen_batch
@@ -37,7 +32,7 @@ def main():
     try:
         umd = data.french_momentum(start="2015-01-01")
         m = results["raw"].daily.resample("ME").sum()
-        m.index = m.index.to_period("M")          # 按月份周期对齐(月末 vs 月初标签会零交集)
+        m.index = m.index.to_period("M")          # align on monthly periods (month-end vs month-start labels never intersect)
         umd.index = umd.index.to_period("M")
         joint = m.to_frame("strat").join(umd, how="inner").dropna()
         c = joint["strat"].corr(joint["UMD"])
